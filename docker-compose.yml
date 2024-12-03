@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  config-server:
+    image: openjdk:17-jdk-slim
+    container_name: config_server_container
+    build:
+      context: ./config-server
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - banking-network
+
+  discovery-server:
+    image: openjdk:17-jdk-slim
+    container_name: discovery_server_container
+    build:
+      context: ./discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - banking-network
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgresql_container
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - banking-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_container
+    ports:
+      - "5672:5672"   # RabbitMQ messaging port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    networks:
+      - banking-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak_container
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
+      KC_DB_USERNAME: root
+      KC_DB_PASSWORD: root
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - banking-network
+
+  maildev:
+    image: maildev/maildev
+    container_name: maildev_container
+    ports:
+      - "1025:1025" # SMTP Port
+      - "1080:1080" # Web UI Port
+    networks:
+      - banking-network
+
+networks:
+  banking-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
