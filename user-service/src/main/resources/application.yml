@@ -13,6 +13,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9098/realms/micro-bank
 
 eureka:
   client:
@@ -23,3 +28,4 @@ eureka:
 
 server:
   port: 8081
+

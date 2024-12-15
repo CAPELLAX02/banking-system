@@ -18,8 +18,8 @@ services:
     image: rabbitmq:3-management
     container_name: rabbitmq_container
     ports:
-      - "5672:5672"   # RabbitMQ messaging port
-      - "15672:15672" # Management UI
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
@@ -27,21 +27,27 @@ services:
       - banking-network
 
   keycloak:
-    image: quay.io/keycloak/keycloak:21.1.1
+    image: quay.io/keycloak/keycloak:24.0.2
     container_name: keycloak_container
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
+      KC_DB_URL: jdbc:postgresql://postgresql_container:5432/keycloak_db
       KC_DB_USERNAME: root
       KC_DB_PASSWORD: root
     ports:
-      - "8080:8080"
+      - "9098:8080"
     depends_on:
       - postgres
     networks:
       - banking-network
+    volumes:
+      - ./keycloak-realm-config.json:/opt/keycloak/data/import/realm-config.json
+    command:
+      - "start-dev"
+      - "--import-realm"
+
 
   maildev:
     image: maildev/maildev
