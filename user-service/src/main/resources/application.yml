@@ -29,3 +29,9 @@ eureka:
 server:
   port: 8081
 
+keycloak:
+  server-uri: http://localhost:9098
+  realm: micro-bank
+  client-id: admin-cli
+  username: admin
+  password: admin
